@@ -1,0 +1,5 @@
+- [x] finish worker lock system
+- [x] add in handling of loading rails app when starting daemon
+- [ ] add in simple error handling
+- [ ] add in handling of ActiveRecord connections
+- [x] add config file loading 

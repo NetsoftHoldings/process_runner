@@ -1,0 +1,89 @@
+require:
+  - rubocop-rspec
+
+inherit_mode:
+  merge:
+    - Exclude
+
+AllCops:
+  TargetRubyVersion: 2.5
+  Exclude:
+    - lib/process_runner/private/*
+
+Layout/EmptyLinesAroundAttributeAccessor:
+  Enabled: true
+Layout/ExtraSpacing:
+  AllowForAlignment: true
+Layout/FirstArrayElementIndentation:
+  EnforcedStyle: consistent
+  IndentationWidth: 4
+Layout/FirstHashElementIndentation:
+  EnforcedStyle: consistent
+  IndentationWidth: 4
+Layout/HashAlignment:
+  EnforcedHashRocketStyle: table
+  EnforcedColonStyle: table
+Layout/LineLength:
+  Max: 145
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented_relative_to_receiver
+  IndentationWidth: 4
+Layout/MultilineOperationIndentation:
+  EnforcedStyle: indented
+Layout/SpaceAroundMethodCallOperator:
+  Enabled: true
+Layout/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: no_space
+
+Lint/AmbiguousBlockAssociation:
+  Exclude:
+    - spec/**/*
+Lint/RaiseException:
+  Enabled: true
+Lint/StructNewOverride:
+  Enabled: true
+
+Metrics:
+  Enabled: false
+
+RSpec/ContextWording:
+  Prefixes:
+    - when
+    - with
+    - without
+    - and
+RSpec/ExpectChange:
+  EnforcedStyle: block
+RSpec/ImplicitSubject:
+  Enabled: false
+RSpec/MessageSpies:
+  EnforcedStyle: receive
+RSpec/MultipleExpectations:
+  Max: 2
+RSpec/NamedSubject:
+  Enabled: false
+RSpec/NestedGroups:
+  Enabled: false
+RSpec/NotToNot:
+  EnforcedStyle: to_not
+
+Style/ExponentialNotation:
+  Enabled: true
+Style/HashEachMethods:
+  Enabled: true
+Style/IfUnlessModifier:
+  Enabled: false
+Style/GuardClause:
+  Enabled: false
+Style/Semicolon:
+  AllowAsExpressionSeparator: true
+Style/SlicingWithRange:
+  Enabled: true
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma
+Style/HashTransformKeys:
+  Enabled: true
+Style/HashTransformValues:
+  Enabled: true
