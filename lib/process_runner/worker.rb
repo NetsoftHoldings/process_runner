@@ -22,6 +22,8 @@ module ProcessRunner
       !@origin.resolved? && !@future.resolved?
     end
 
+    # Should `stopped?` be the complete opposite of `running?`?
+    # Should we also check `@origin` here?
     def stopped?
       @future.resolved?
     end

@@ -120,23 +120,16 @@ module ProcessRunner
     end
 
     def locate_config_file!(opts)
-      if opts[:config_file]
-        unless File.exist?(opts[:config_file])
-          raise ArgumentError, "Config file not found: #{opts[:config_file]}"
-        end
+      if opts[:config_file] && !File.exist?(opts[:config_file])
+        raise ArgumentError, "Config file not found: #{opts[:config_file]}"
       else
         config_dir = if opts[:require] && File.directory?(opts[:require])
                        File.join(opts[:require], 'config')
                      else
                        File.join(options[:require], 'config')
                      end
-
-        %w[process_runner.yml].each do |config_file|
-          path = File.join(config_dir, config_file)
-          if File.exist?(path)
-            opts[:config_file] ||= path
-          end
-        end
+        path = File.join(config_dir, 'process_runner.yml')
+        opts[:config_file] ||= path if File.exist?(path)
       end
     end
 

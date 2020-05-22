@@ -5,20 +5,20 @@ require 'redis'
 
 module ProcessRunner
   module RedisConnection # :nodoc:
-    def self.create(options = {})
-      options[:url] = determine_redis_provider
-      size          = options[:size] || 2
-      pool_timeout  = options[:pool_timeout] || 1
-      ConnectionPool.new(timeout: pool_timeout, size: size) do
-        build_client(options)
-      end
-    end
-
     class << self
+      def create(options = {})
+        options[:url] = determine_redis_provider
+        size          = options[:size] || 2
+        pool_timeout  = options[:pool_timeout] || 1
+        ConnectionPool.new(timeout: pool_timeout, size: size) do
+          build_client(options)
+        end
+      end
+
       private
 
       def determine_redis_provider
-        if ENV['REDIS_PROVIDER'] =~ /[^A-Za-z_]/
+        if ENV['REDIS_PROVIDER'] =~ /[^\w_\d]/
           ProcessRunner.logger.error 'REDIS_PROVIDER should be set to the name of the environment variable that contains the redis URL'
         end
         ENV[

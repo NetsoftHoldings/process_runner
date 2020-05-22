@@ -8,7 +8,7 @@ RSpec.describe ProcessRunner::Base do
     Class.new(described_class) do
       def lock_records; end
 
-      def process_record(_record) end
+      def process_record(_record); end
 
       def unlock_records; end
 
