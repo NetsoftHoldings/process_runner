@@ -145,8 +145,9 @@ module ProcessRunner
     def setup_job_watchers
       @watchers = {}
       @options.fetch(:job_sets, []).each do |job_config|
-        logger.debug "Starting watcher for #{job_config[:id]}"
-        @watchers[job_config[:id]] = Watcher.new(job_config)
+        job_id = job_config[:id]
+        logger.debug "Starting watcher for #{job_id}"
+        @watchers[job_id] = Watcher.new(job_config)
       end
     end
 

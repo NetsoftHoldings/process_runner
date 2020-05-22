@@ -102,10 +102,6 @@ module ProcessRunner
           opts[:config_file] = arg
         end
 
-        o.on '-nNAMESPACE', '--namespace NAMESPACE', 'Use a namespace for redis keys' do |arg|
-          opts[:redis][:namespace] = arg
-        end
-
         o.on('-v', '--[no-]verbose', 'Run verbosely') do |v|
           opts[:verbose] = v
         end

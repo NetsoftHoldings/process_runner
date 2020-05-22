@@ -29,6 +29,23 @@ module ProcessRunner # :nodoc:
     @options = opts
   end
 
+  ##
+  # Configuration for ProcessRunner, use like:
+  #
+  #   ProcessRunner.configure do |config|
+  #     config.redis = { :namespace => 'myapp', :size => 25, :url => 'redis://myhost:8877/0' }
+  #     if config.server?
+  #      # any configuration specific to server
+  #     end
+  #   end
+  def self.configure
+    yield self
+  end
+
+  def self.server?
+    defined?(ProcessRunner::CLI)
+  end
+
   def self.logger
     @logger ||= Logger.new(STDOUT, level: Logger::INFO)
   end
@@ -50,6 +67,14 @@ module ProcessRunner # :nodoc:
 
   def self.redis_pool
     @redis_pool ||= RedisConnection.create(options[:redis])
+  end
+
+  def self.redis=(hash)
+    @redis_pool = if hash.is_a?(ConnectionPool)
+                    hash
+                  else
+                    RedisConnection.create(hash)
+                  end
   end
 
   def self.reset

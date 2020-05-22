@@ -38,14 +38,6 @@ RSpec.describe ProcessRunner::CLI do
       end
     end
 
-    context 'with namespace arg' do
-      let(:args) { %w[-n test] }
-
-      it 'sets the redis namespace config' do
-        expect { subject }.to change { ProcessRunner.options[:redis] }.to include(namespace: 'test')
-      end
-    end
-
     context 'with verbose arg' do
       let(:args) { %w[-v] }
 
