@@ -285,7 +285,7 @@ RSpec.describe ProcessRunner::CLI do
       allow(instance).to receive(:trap)
       allow(instance).to receive(:exit)
       allow(instance.logger).to receive(:info)
-      allow(instance).to receive(:select).and_return([[instance_double('IO', gets: 'INT')]])
+      allow(IO).to receive(:select).and_return([[instance_double('IO', gets: 'INT')]])
     end
 
     it 'traps signals' do

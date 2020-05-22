@@ -52,7 +52,7 @@ module ProcessRunner
       begin
         @manager.run
 
-        while (readable_io = select([self_read]))
+        while (readable_io = IO.select([self_read]))
           signal = readable_io.first[0].gets.strip
           handle_signal(signal)
         end
@@ -237,10 +237,6 @@ module ProcessRunner
       else
         logger.info("No signal handler for #{sig}")
       end
-    end
-
-    def select(*args)
-      IO.select(*args)
     end
 
     # endregion
