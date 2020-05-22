@@ -21,6 +21,8 @@ module ProcessRunner
       keep_set = process_count.zero? ? [] : (0...job_count).select { |i| (i % process_count) == process_index }
 
       with_lock do
+        check_workers
+
         running_set = @running.keys
         create_set  = keep_set - running_set
         stop_set    = running_set - keep_set
@@ -44,14 +46,14 @@ module ProcessRunner
     def start_worker(worker_id)
       raise 'Not called within synchronize block' unless @lock.owned?
 
-      logger.info "Starting worker #{job_config[:id]} @ #{worker_id}"
+      logger.info "Starting worker #{job_id} @ #{worker_id}"
       @running[worker_id] = Worker.new(worker_id, job_class, job_config)
     end
 
     def stop_worker(worker_id)
       raise 'Not called within synchronize block' unless @lock.owned?
 
-      logger.info "Stopping worker #{job_config[:id]} @ #{worker_id}"
+      logger.info "Stopping worker #{job_id} @ #{worker_id}"
 
       worker = @running.delete(worker_id)
       if worker
@@ -61,17 +63,26 @@ module ProcessRunner
     end
 
     def check_workers
-      with_lock do
-        @running.each do |k, v|
-          if v.running?
-            # TODO: build up status info
-          else
-            stop_worker(k)
-          end
-        end
+      raise 'Not called within synchronize block' unless @lock.owned?
 
-        @stopping.delete_if(&:stopped?)
+      @running.each do |k, v|
+        if v.running?
+          # TODO: build up status info
+        else
+          stop_worker(k)
+        end
       end
+
+      @stopping.delete_if do |e|
+        if e.stopped?
+          logger.debug("Reaping worker #{job_id} @ #{e.worker_index}")
+          true
+        end
+      end
+    end
+
+    def job_id
+      job_config[:id]
     end
 
     def job_class

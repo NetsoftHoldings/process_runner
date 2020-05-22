@@ -34,8 +34,8 @@ Each instance of the Job will have a unique worker_id to ensure they do not tram
 [source,ruby]
 ----
 class ProcessQueue < ProcessRunner::Base
-  # include a worker locking algorithm
-  include ProcessRunner::Lock::SimpleRedis
+  # set a worker locking algorithm
+  lock_driver :simple_redis
 
   LOCK_SQL = <<~SQL
     WITH T as (

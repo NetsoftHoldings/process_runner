@@ -57,6 +57,12 @@ RSpec.describe ProcessRunner::Watcher do
       subject
     end
 
+    it 'calls check_workers' do
+      expect(instance).to receive(:check_workers)
+
+      subject
+    end
+
     context 'when there are no current workers' do
       context 'and there should be 1' do
         it 'spawns the worker' do
@@ -236,14 +242,14 @@ RSpec.describe ProcessRunner::Watcher do
   describe '#check_workers' do
     include_context 'with spin up workers', ids: [0]
 
-    subject { instance.send(:check_workers) }
+    subject { instance.send(:with_lock) { instance.send(:check_workers) } }
 
     let(:worker) { running_workers[0] }
 
-    it 'runs everything in a lock' do
-      expect(instance).to receive(:with_lock)
-
-      subject
+    context 'when not run within the lock' do
+      it 'raises a runtime error' do
+        expect { instance.send(:check_workers) }.to raise_error('Not called within synchronize block')
+      end
     end
 
     context 'when the worker is running' do

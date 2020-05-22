@@ -7,6 +7,8 @@ require_relative 'private/cancellation'
 
 module ProcessRunner
   class Worker # :nodoc:
+    attr_reader :worker_index
+
     def initialize(worker_index, job_class, job_options)
       # TODO: should use future_on and pass our thread pool
       @worker_index         = worker_index
