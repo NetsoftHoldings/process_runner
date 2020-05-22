@@ -10,6 +10,8 @@ module ProcessRunner
     def initialize(worker_index, job_class, job_options)
       # TODO: should use future_on and pass our thread pool
       @worker_index         = worker_index
+      @job_options          = job_options
+      @job_class            = job_class
       cancellation, @origin = Private::Cancellation.new
       @job                  = job_class.new(worker_index, job_options)
       @future               = Concurrent::Promises.future(cancellation, &method(:runner))
@@ -31,6 +33,7 @@ module ProcessRunner
     private
 
     def runner(cancellation)
+      Thread.current.name = "Worker: #{@job_options[:id]} @ #{@worker_index}"
       loop do
         cancellation.check!
 

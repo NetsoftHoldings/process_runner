@@ -44,12 +44,14 @@ module ProcessRunner
     def start_worker(worker_id)
       raise 'Not called within synchronize block' unless @lock.owned?
 
-      logger.info "Starting worker #{job_config[:id]}@#{worker_id}"
+      logger.info "Starting worker #{job_config[:id]} @ #{worker_id}"
       @running[worker_id] = Worker.new(worker_id, job_class, job_config)
     end
 
     def stop_worker(worker_id)
       raise 'Not called within synchronize block' unless @lock.owned?
+
+      logger.info "Stopping worker #{job_config[:id]} @ #{worker_id}"
 
       worker = @running.delete(worker_id)
       if worker

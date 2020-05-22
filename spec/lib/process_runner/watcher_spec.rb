@@ -16,7 +16,7 @@ RSpec.describe ProcessRunner::Watcher do
 
       # naive implementation for tests
       def worker_lock
-        yield
+        yield OpenStruct.new(extend!: true)
       end
     end
   end

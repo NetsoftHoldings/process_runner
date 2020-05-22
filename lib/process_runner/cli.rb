@@ -27,6 +27,7 @@ module ProcessRunner
     def run
       boot_system
       logger.info "Booted Rails #{::Rails.version} application in #{environment} environment" if rails_app?
+      Thread.current.name = 'main'
 
       self_read, self_write = IO.pipe
       signals               = %w[INT TERM TTIN TSTP USR1 USR2]

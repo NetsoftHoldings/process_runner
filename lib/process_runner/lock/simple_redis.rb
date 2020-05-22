@@ -15,34 +15,64 @@ module ProcessRunner
                          end
       end
 
-      def worker_lock(&block)
-        lock_id     = "lock_#{job_id}_#{worker_index}"
-        lock_value  = ProcessRunner.identity
-        time_source = ProcessRunner::Lock::SimpleRedis.time_source
-        timeout_ms  = 5000
-        wait_time   = 0.02..0.1
-        start       = time_source.call
-
-        while !(obtained = try_lock(lock_id, lock_value)) && (time_source.call - start) < timeout_ms
-          sleep rand(wait_time)
+      class LockHandler
+        def initialize(key, value, ttl)
+          @key      = key
+          @value    = value
+          @ttl      = ttl
+          @acquired = false
         end
 
-        if obtained
-          begin
-            block.call
-          ensure
-            ProcessRunner.redis do |c|
-              c.del(lock_id)
+        def acquire!
+          time_source = ProcessRunner::Lock::SimpleRedis.time_source
+
+          timeout_ms = 5000
+          wait_time  = 0.02..0.1
+          start      = time_source.call
+
+          while !(@acquired = try_lock) && (time_source.call - start) < timeout_ms
+            sleep rand(wait_time)
+          end
+        end
+
+        def release!
+          ProcessRunner.redis do |c|
+            c.del(@key)
+          end
+        end
+
+        def acquired?
+          @acquired
+        end
+
+        def try_lock
+          ProcessRunner.redis do |c|
+            c.set(@key, @value, nx: true, ex: @ttl)
+          end
+        end
+
+        def extend!
+          ProcessRunner.redis do |c|
+            c.watch(@key)
+            if c.get(@key) == @value
+              c.multi do
+                c.set(@key, @value, ex: @ttl)
+              end
             end
           end
         end
       end
 
-      private
+      def worker_lock
+        lock = LockHandler.new("lock_#{job_id}_#{worker_index}", ProcessRunner.identity, runtime_lock_timeout)
+        lock.acquire!
 
-      def try_lock(key, value)
-        ProcessRunner.redis do |c|
-          c.set(key, value, nx: true, ex: runtime_lock_timeout)
+        if lock.acquired?
+          begin
+            yield lock
+          ensure
+            lock.release!
+          end
         end
       end
     end

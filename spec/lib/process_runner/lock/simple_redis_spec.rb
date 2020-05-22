@@ -31,7 +31,8 @@ RSpec.describe ProcessRunner::Lock::SimpleRedis do
 
   context 'when the lock is obtained' do
     it 'sets a lock in redis' do
-      expect(redis).to receive(:set).with('lock_my_job_1', any_args).and_call_original
+      expect(redis).to receive(:set).with('lock_my_job_1', ProcessRunner.identity, hash_including(nx: true)).and_call_original
+      expect(redis).to receive(:set).with('lock_my_job_1', ProcessRunner.identity, hash_not_including(nx: true)).and_call_original
 
       subject
     end
@@ -75,7 +76,11 @@ RSpec.describe ProcessRunner::Lock::SimpleRedis do
     end
 
     it 'sleeps between each attempt' do
-      expect(instance).to receive(:sleep).twice
+      handler = described_class::LockHandler.new('lock_my_job_1', ProcessRunner.identity, 30)
+
+      allow(described_class::LockHandler).to receive(:new).and_return(handler)
+
+      expect(handler).to receive(:sleep).twice
 
       subject
     end

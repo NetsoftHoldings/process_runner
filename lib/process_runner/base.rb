@@ -25,11 +25,13 @@ module ProcessRunner
     end
 
     def perform
-      worker_lock do
+      worker_lock do |lock|
         @status = nil
         records = lock_records
+        lock.extend!
         records&.each do |r|
           process_record(r)
+          lock.extend!
         end
         @status
       ensure
