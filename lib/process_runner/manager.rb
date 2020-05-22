@@ -55,7 +55,7 @@ module ProcessRunner
       quiet
 
       @pool.shutdown
-      @pool.wait_for_termination(30)
+      @pool.wait_for_termination(ProcessRunner.options[:shutdown_timeout])
       @pool.kill
 
       clear_heartbeat

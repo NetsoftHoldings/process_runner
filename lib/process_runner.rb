@@ -15,10 +15,11 @@ module ProcessRunner # :nodoc:
   WORKER_COUNT_KEY = 'worker_counts'
 
   DEFAULTS = {
-      redis:       {},
-      job_sets:    [],
-      require:     '.',
-      max_threads: 10,
+      redis:            {},
+      job_sets:         [],
+      require:          '.',
+      max_threads:      10,
+      shutdown_timeout: 30,
   }.freeze
 
   def self.options
