@@ -5,12 +5,17 @@ require 'process_runner/base'
 RSpec.describe ProcessRunner::Base do
   let(:worker_index) { 1 }
   let(:job_class) do
-    Class.new(ProcessRunner::Base) do
+    Class.new(described_class) do
       def lock_records; end
 
       def process_record(_record) end
 
       def unlock_records; end
+
+      # naive implementation for tests
+      def worker_lock
+        yield
+      end
     end
   end
   let(:job_options) { {id: :my_job, class: 'MyJob'} }
@@ -140,9 +145,55 @@ RSpec.describe ProcessRunner::Base do
     end
   end
 
+  describe '.lock_driver' do
+    subject { job_class.lock_driver(:driver) }
+
+    let(:driver) do
+      Module.new do
+        def worker_lock
+          yield
+        end
+      end
+    end
+    let(:job_class) { Class.new(described_class) }
+
+    context 'when the driver file exists' do
+      before do
+        allow(job_class).to receive(:require).with('process_runner/lock/driver')
+        stub_const('ProcessRunner::Lock::Driver', driver)
+      end
+
+      it 'includes the driver into the job class' do
+        expect(job_class).to receive(:include).with(ProcessRunner::Lock::Driver)
+
+        subject
+      end
+
+      it 'adds the replacement worker_lock method' do
+        subject
+
+        expect(job_class.instance_method(:worker_lock).owner).to eq(driver)
+      end
+    end
+
+    context 'when the driver file does not exist' do
+      before do
+        allow(job_class).to receive(:require).with('process_runner/lock/driver').and_raise(LoadError)
+      end
+
+      it 'raises the LoadError' do
+        expect { subject }.to raise_error(LoadError)
+      end
+    end
+  end
+
   describe 'not implemented methods' do
     let(:job_class) do
       Class.new(described_class)
+    end
+
+    it 'raises not implemented for worker_lock' do
+      expect { instance.send(:worker_lock) {} }.to raise_error(NotImplementedError)
     end
 
     it 'raises not implemented for lock_records' do

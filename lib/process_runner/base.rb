@@ -2,9 +2,22 @@
 
 module ProcessRunner
   class Base # :nodoc:
-    attr_reader :worker_index
-    attr_reader :status
-    attr_reader :options
+    attr_reader :worker_index, :status, :options
+
+    def self.lock_driver(driver)
+      if driver.is_a?(Symbol)
+        file = "process_runner/lock/#{driver}"
+        driver = driver.to_s
+        unless driver !~ /_/ && driver =~ /[A-Z]+.*/
+          driver = driver.split('_').map { |e| e.capitalize }.join
+        end
+        require file
+        klass = ProcessRunner::Lock.const_get(driver)
+        self.include klass
+      else
+        raise ArgumentError, 'Please pass a symbol for the driver to use'
+      end
+    end
 
     def initialize(worker_index, options = {})
       @worker_index = worker_index
@@ -32,10 +45,6 @@ module ProcessRunner
       @status = [:sleep, duration]
     end
 
-    def worker_lock(&block)
-      block.call
-    end
-
     def runtime_lock_timeout
       options[:runtime_lock_timeout] || 30
     end
@@ -43,8 +52,6 @@ module ProcessRunner
     def job_id
       options[:id]
     end
-
-    private
 
     def lock_records
       raise NotImplementedError
@@ -56,6 +63,10 @@ module ProcessRunner
 
     def process_record(record)
       raise NotImplementedError
+    end
+
+    def worker_lock(&block)
+      raise NotImplementedError, 'Specify a locking driver via lock_driver :driver'
     end
   end
 end

@@ -11,8 +11,8 @@ module ProcessRunner
       # TODO: should use future_on and pass our thread pool
       @worker_index         = worker_index
       cancellation, @origin = Private::Cancellation.new
-      @future               = Concurrent::Promises.future(cancellation, &method(:runner))
       @job                  = job_class.new(worker_index, job_options)
+      @future               = Concurrent::Promises.future(cancellation, &method(:runner))
     end
 
     def running?

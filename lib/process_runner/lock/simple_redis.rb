@@ -2,7 +2,7 @@
 
 module ProcessRunner
   module Lock
-    # this is a simple implementation of a lock t ensure only one job runner is running for a worker
+    # This is a simple implementation of a lock to ensure only one job runner is running for a worker
     # This is only save for a single redis instance setup
     # something more resilient should be used instead,
     # e.g. and advisory lock in a DB or using RedLock ( https://github.com/leandromoreira/redlock-rb )

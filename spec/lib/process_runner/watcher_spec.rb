@@ -13,15 +13,21 @@ RSpec.describe ProcessRunner::Watcher do
       end
 
       def unlock_records; end
+
+      # naive implementation for tests
+      def worker_lock
+        yield
+      end
     end
   end
-  let(:job_config) { {id: 'test_job', class: 'MyClass'} }
+  let(:job_config) { {id: :test_job, class: 'MyClass'} }
   let(:instance) { described_class.new(job_config) }
   let(:running_workers) { instance.instance_variable_get(:@running) }
   let(:stopping_workers) { instance.instance_variable_get(:@stopping) }
 
   before do
     stub_const('MyClass', job_class)
+    allow(ProcessRunner.logger).to receive(:info)
   end
 
   describe '#initialize' do

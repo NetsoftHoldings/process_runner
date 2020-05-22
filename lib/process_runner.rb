@@ -7,6 +7,7 @@ require 'yaml'
 
 require_relative 'process_runner/version'
 require_relative 'process_runner/redis_connection'
+require_relative 'process_runner/base'
 
 module ProcessRunner # :nodoc:
   class Error < StandardError; end

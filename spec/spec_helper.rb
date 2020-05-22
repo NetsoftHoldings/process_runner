@@ -6,6 +6,8 @@ require 'fakefs/safe'
 require 'simplecov'
 SimpleCov.start
 
+require 'process_runner'
+
 Dir[File.join(__dir__, 'support/*.rb')].sort.each { |f| require f }
 
 RSpec.configure do |config|

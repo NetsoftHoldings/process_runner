@@ -96,7 +96,7 @@ module ProcessRunner
         update_jobs
       end
     rescue StandardError => e
-      logger.error("heartbeat: #{e.message} @ #{e.backtrace_locations.first}")
+      logger.error("heartbeat: #{e.message} @ #{e.backtrace_locations&.first || ''}")
     end
 
     def update_state
@@ -137,15 +137,16 @@ module ProcessRunner
     end
 
     def update_jobs
-      @job_watchers.each do |job_id, watcher|
+      @watchers.each do |job_id, watcher|
         watcher.update_worker_config(process_index, process_count, workers_for_job(job_id))
       end
     end
 
     def setup_job_watchers
-      @job_watchers = {}
+      @watchers = {}
       @options.fetch(:job_sets, []).each do |job_config|
-        @job_watchers[job_config[:id].to_sym] = Watcher.new(job_config)
+        logger.debug "Starting watcher for #{job_config[:id]}"
+        @watchers[job_config[:id]] = Watcher.new(job_config)
       end
     end
 

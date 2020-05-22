@@ -12,15 +12,15 @@ RSpec.describe ProcessRunner::Manager do
   worker_count_key = ProcessRunner::WORKER_COUNT_KEY
 
   describe '#initialize' do
-    let(:job_sets) { [{id: 'test_job', class: 'MyClass'}] }
-    let(:job_watchers) { instance.instance_variable_get(:@job_watchers) }
+    let(:job_sets) { [{id: :test_job, class: 'MyClass'}] }
+    let(:watchers) { instance.instance_variable_get(:@watchers) }
 
     it 'creates the watcher' do
-      expect(job_watchers[:test_job]).to be_a(ProcessRunner::Watcher)
+      expect(watchers[:test_job]).to be_a(ProcessRunner::Watcher)
     end
 
     it 'sets the job config' do
-      expect(job_watchers[:test_job].job_config).to eq(job_sets[0])
+      expect(watchers[:test_job].job_config).to eq(job_sets[0])
     end
   end
 
@@ -275,7 +275,7 @@ RSpec.describe ProcessRunner::Manager do
     end
 
     describe 'managing the job watchers' do
-      let(:job_sets) { [{id: 'test_job', class: 'MyClass'}] }
+      let(:job_sets) { [{id: :test_job, class: 'MyClass'}] }
 
       it 'updates each job watcher' do
         watcher = instance_double(ProcessRunner::Watcher)

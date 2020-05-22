@@ -12,8 +12,7 @@ module ProcessRunner
   class CLI # :nodoc:
     include Util
 
-    attr_reader :manager
-    attr_reader :environment
+    attr_reader :manager, :environment
 
     def self.instance
       @instance ||= new
@@ -41,6 +40,11 @@ module ProcessRunner
       end
 
       logger.info "Running in #{RUBY_DESCRIPTION}"
+
+      logger.info 'Configured jobs'
+      options[:job_sets].each do |config|
+        logger.info " - #{config[:id]}"
+      end
 
       @manager = ProcessRunner::Manager.new(options)
 

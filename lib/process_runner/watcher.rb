@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require_relative 'worker'
+require_relative 'util'
 
 module ProcessRunner
   class Watcher # :nodoc:
+    include Util
+
     attr_reader :job_config
 
     def initialize(job_config)
@@ -41,6 +44,7 @@ module ProcessRunner
     def start_worker(worker_id)
       raise 'Not called within synchronize block' unless @lock.owned?
 
+      logger.info "Starting worker #{job_config[:id]}@#{worker_id}"
       @running[worker_id] = Worker.new(worker_id, job_class, job_config)
     end
 
