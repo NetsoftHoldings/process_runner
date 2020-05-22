@@ -6,7 +6,8 @@ require 'process_runner/base'
 RSpec.describe ProcessRunner::Worker do
   let(:worker_index) { 0 }
 
-  let(:instance) { described_class.new(worker_index, job_class, job_options) }
+  let(:instance) { described_class.new(pool, worker_index, job_class, job_options) }
+  let(:pool) { instance_double(Concurrent::ThreadPoolExecutor) }
   let(:future) { instance_double(Concurrent::Promises::Future) }
   let(:cancellation) { ProcessRunner::Private::Cancellation.new }
   let(:origin) { cancellation.origin }
@@ -16,7 +17,7 @@ RSpec.describe ProcessRunner::Worker do
   let(:job_class) { Class.new(ProcessRunner::Base) }
 
   before do
-    allow(Concurrent::Promises).to receive(:future).and_return(future)
+    allow(Concurrent::Promises).to receive(:future_on).and_return(future)
     allow(ProcessRunner::Private::Cancellation).to receive(:new).and_return([cancellation, origin])
   end
 

@@ -9,14 +9,14 @@ module ProcessRunner
   class Worker # :nodoc:
     attr_reader :worker_index
 
-    def initialize(worker_index, job_class, job_options)
-      # TODO: should use future_on and pass our thread pool
+    def initialize(pool, worker_index, job_class, job_options)
+      @pool                 = pool
       @worker_index         = worker_index
       @job_options          = job_options
       @job_class            = job_class
       cancellation, @origin = Private::Cancellation.new
       @job                  = job_class.new(worker_index, job_options)
-      @future               = Concurrent::Promises.future(cancellation, &method(:runner))
+      @future               = Concurrent::Promises.future_on(@pool, cancellation, &method(:runner))
     end
 
     def running?

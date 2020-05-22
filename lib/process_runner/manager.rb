@@ -20,7 +20,7 @@ module ProcessRunner
       @done          = false
       @process_index = Concurrent::AtomicFixnum.new(-1)
       @process_count = Concurrent::AtomicFixnum.new(0)
-      @pool          = Concurrent::ThreadPoolExecutor.new(max_threads: options[:max_threads])
+      @pool          = Concurrent::ThreadPoolExecutor.new(max_threads: options[:max_threads], fallback_policy: :discard)
 
       setup_job_watchers
     end
@@ -35,7 +35,7 @@ module ProcessRunner
     end
 
     def workers_for_job(job_id)
-      value = ProcessRunner.worker_count(job_id)
+      value = stopping? ? 0 : ProcessRunner.worker_count(job_id)
 
       value.nil? ? 1 : value
     end
@@ -45,11 +45,19 @@ module ProcessRunner
     end
 
     def quiet
+      return if @done
       @done = true
+
+      update_jobs
     end
 
     def stop
-      @done = true
+      quiet
+
+      @pool.shutdown
+      @pool.wait_for_termination(30)
+      @pool.kill
+
       clear_heartbeat
     end
 
@@ -147,7 +155,7 @@ module ProcessRunner
       @options.fetch(:job_sets, []).each do |job_config|
         job_id = job_config[:id]
         logger.debug "Starting watcher for #{job_id}"
-        @watchers[job_id] = Watcher.new(job_config)
+        @watchers[job_id] = Watcher.new(@pool, job_config)
       end
     end
 

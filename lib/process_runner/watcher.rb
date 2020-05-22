@@ -9,7 +9,8 @@ module ProcessRunner
 
     attr_reader :job_config
 
-    def initialize(job_config)
+    def initialize(pool, job_config)
+      @pool       = pool
       @job_config = job_config
       @running    = {}
       @stopping   = []
@@ -47,7 +48,7 @@ module ProcessRunner
       raise 'Not called within synchronize block' unless @lock.owned?
 
       logger.info "Starting worker #{job_id} @ #{worker_id}"
-      @running[worker_id] = Worker.new(worker_id, job_class, job_config)
+      @running[worker_id] = Worker.new(@pool, worker_id, job_class, job_config)
     end
 
     def stop_worker(worker_id)

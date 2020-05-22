@@ -21,13 +21,20 @@ RSpec.describe ProcessRunner::Watcher do
     end
   end
   let(:job_config) { {id: :test_job, class: 'MyClass'} }
-  let(:instance) { described_class.new(job_config) }
+  let(:instance) { described_class.new(pool, job_config) }
+  let(:pool) { instance_double(Concurrent::ThreadPoolExecutor) }
+  let(:future) { instance_double(Concurrent::Promises::Future, resolved?: false) }
+  let(:cancellation) { instance_double(ProcessRunner::Private::Cancellation) }
+  let(:origin) { instance_double(Concurrent::Promises.resolvable_event.class, resolve: true, resolved?: false) }
+
   let(:running_workers) { instance.instance_variable_get(:@running) }
   let(:stopping_workers) { instance.instance_variable_get(:@stopping) }
 
   before do
     stub_const('MyClass', job_class)
     allow(ProcessRunner.logger).to receive(:info)
+    allow(Concurrent::Promises).to receive(:future_on).and_return(future)
+    allow(ProcessRunner::Private::Cancellation).to receive(:new).and_return([cancellation, origin])
   end
 
   describe '#initialize' do
@@ -169,7 +176,7 @@ RSpec.describe ProcessRunner::Watcher do
 
     context 'with a simple job class name' do
       it 'passes that job class to the worker new' do
-        expect(ProcessRunner::Worker).to receive(:new).with(worker_id, job_class, job_config)
+        expect(ProcessRunner::Worker).to receive(:new).with(pool, worker_id, job_class, job_config)
 
         subject
       end
@@ -182,7 +189,7 @@ RSpec.describe ProcessRunner::Watcher do
       end
 
       it 'passes that job class tot he worker new' do
-        expect(ProcessRunner::Worker).to receive(:new).with(worker_id, job_class, job_config)
+        expect(ProcessRunner::Worker).to receive(:new).with(pool, worker_id, job_class, job_config)
 
         subject
       end

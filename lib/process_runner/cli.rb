@@ -59,9 +59,9 @@ module ProcessRunner
       rescue Interrupt
         logger.info 'Shutting down'
         @manager.stop
-        # Explicitly exit so busy Processor threads can't block
-        # process shutdown.
         logger.info 'Bye!'
+
+        # Explicitly exit so busy Processor threads wont block process shutdown.
         exit(0)
       end
     end

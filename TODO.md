@@ -2,6 +2,6 @@
 - [x] add in handling of loading rails app when starting daemon
 - [x] add config file loading 
 - [x] implement watcher cleanup
-- [ ] implement quiet properly (should stop watchers)
+- [x] implement quiet properly (should stop watchers)
 - [ ] add in simple error handling
 - [ ] add in handling of ActiveRecord connections

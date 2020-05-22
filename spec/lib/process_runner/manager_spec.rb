@@ -6,7 +6,12 @@ RSpec.describe ProcessRunner::Manager do
   let(:base_options) { ProcessRunner::DEFAULTS }
   let(:job_sets) { [] }
   let(:options) { base_options.merge(job_sets: job_sets) }
+  let(:pool) { instance_double(Concurrent::ThreadPoolExecutor, shutdown: true, wait_for_termination: true, kill: true) }
   let(:instance) { described_class.new(options) }
+
+  before do
+    allow(Concurrent::ThreadPoolExecutor).to receive(:new).and_return(pool)
+  end
 
   processes_key = ProcessRunner::Manager::PROCESSES_KEY
   worker_count_key = ProcessRunner::WORKER_COUNT_KEY
@@ -37,18 +42,46 @@ RSpec.describe ProcessRunner::Manager do
   describe '#quiet' do
     subject { instance.quiet }
 
-    it 'chagnes the @done ivar to true' do
+    it 'changes the @done ivar to true' do
       expect { subject }.to change { instance.instance_variable_get(:@done) }.to(true)
+    end
+
+    it 'calls update_jobs' do
+      expect(instance).to receive(:update_jobs)
+
+      subject
     end
   end
 
   describe '#stop' do
     subject { instance.stop }
 
-    it 'chagnes the @done ivar to true' do
+    before do
       allow(instance).to receive(:clear_heartbeat)
+    end
 
-      expect { subject }.to change { instance.instance_variable_get(:@done) }.to(true)
+    it 'calls quiet' do
+      expect(instance).to receive(:quiet)
+
+      subject
+    end
+
+    it 'tells the pool to shutdown' do
+      expect(pool).to receive(:shutdown)
+
+      subject
+    end
+
+    it 'tells the pool to wait for termination' do
+      expect(pool).to receive(:wait_for_termination).with(30)
+
+      subject
+    end
+
+    it 'tells the pool to kill itself' do
+      expect(pool).to receive(:kill)
+
+      subject
     end
 
     it 'calls clear_heartbeat' do
@@ -84,6 +117,16 @@ RSpec.describe ProcessRunner::Manager do
     subject { instance.workers_for_job(job_id) }
 
     let(:job_id) { :my_job }
+
+    context 'when the manager is queited' do
+      before do
+        instance.quiet
+      end
+
+      it 'returns 0' do
+        is_expected.to eq(0)
+      end
+    end
 
     context 'when there is no override in redis' do
       it 'returns 1' do
@@ -156,7 +199,7 @@ RSpec.describe ProcessRunner::Manager do
       allow(Process).to receive(:kill)
     end
 
-    describe 'managing the process index' do
+    describe 'update_process_index - managing the process index' do
       it 'watches the processes key' do
         expect(redis).to receive(:watch).with(processes_key)
 
@@ -254,7 +297,7 @@ RSpec.describe ProcessRunner::Manager do
       end
     end
 
-    describe 'updating the state in redis' do
+    describe 'update_state - updating the state in redis' do
       it 'creates/updates a hash key for its identity' do
         expect { subject }.to change { redis.exists(instance.identity) }.to(true)
 
@@ -274,7 +317,7 @@ RSpec.describe ProcessRunner::Manager do
       end
     end
 
-    describe 'managing the job watchers' do
+    describe 'update_jobs - managing the job watchers' do
       let(:job_sets) { [{id: :test_job, class: 'MyClass'}] }
 
       it 'updates each job watcher' do
