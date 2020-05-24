@@ -53,7 +53,8 @@ class ProcessQueue < ProcessRunner::Base
 
   def lock_records
     # grab a # of records and lock them with the worker_id
-    ActiveRecord::Base.sanitize_sql([sql, {lock: worker_index, now: Time.now}])
+    sql = ActiveRecord::Base.sanitize_sql([LOCK_SQL, lock: worker_index, now: Time.now])
+    ActiveRecord::Base.connection.execute(sql)
     # process those records
     QueueRecord.where(lock: worker_index)
   end
