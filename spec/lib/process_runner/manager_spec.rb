@@ -13,7 +13,7 @@ RSpec.describe ProcessRunner::Manager do
     allow(Concurrent::ThreadPoolExecutor).to receive(:new).and_return(pool)
   end
 
-  processes_key = ProcessRunner::Manager::PROCESSES_KEY
+  processes_key = ProcessRunner::PROCESSES_KEY
 
   describe '#initialize' do
     let(:job_sets) { [{id: :test_job, class: 'MyClass'}] }
@@ -136,8 +136,8 @@ RSpec.describe ProcessRunner::Manager do
       end
     end
 
-    it 'calls the ProcessRunner.worker_count' do
-      expect(ProcessRunner).to receive(:worker_count).with(job_id)
+    it 'calls the ProcessRunner.scheduled_workers' do
+      expect(ProcessRunner).to receive(:scheduled_workers).with(job_id)
 
       subject
     end

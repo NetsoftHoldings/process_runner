@@ -12,6 +12,7 @@ require_relative 'process_runner/base'
 module ProcessRunner # :nodoc:
   class Error < StandardError; end
 
+  PROCESSES_KEY    = 'processes'
   WORKER_COUNT_KEY = 'worker_counts'
 
   DEFAULTS = {
@@ -99,7 +100,7 @@ module ProcessRunner # :nodoc:
     @identity ||= "#{hostname}:#{$PID}:#{process_nonce}"
   end
 
-  def self.adjust_worker_count(job_id, by: nil, to: nil)
+  def self.adjust_scheduled_workers(job_id, by: nil, to: nil)
     if !to.nil?
       redis { |c| c.hset(WORKER_COUNT_KEY, job_id.to_s, to) }
     elsif !by.nil?
@@ -109,13 +110,31 @@ module ProcessRunner # :nodoc:
     end
   end
 
-  def self.worker_count(job_id)
+  def self.scheduled_workers(job_id)
     value = redis { |c| c.hget(WORKER_COUNT_KEY, job_id.to_s) }&.to_i
     value.nil? ? 1 : value
   end
 
-  def self.running_count(_job_id)
-    nil
+  def self.running_workers(job_id)
+
+    count = 0
+
+    redis do |c|
+      workers = c.lrange(PROCESSES_KEY, 0, -1)
+
+      workers.each do |worker|
+        data = c.hget("#{worker}:workers", job_id)
+        pp data: data
+        if data
+          data = JSON.parse(data, symbolize_names: true)
+          count += (data.dig(:running)&.size || 0)
+        end
+      rescue
+        nil
+      end
+    end
+
+    count
   end
 end
 

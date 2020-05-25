@@ -13,8 +13,6 @@ module ProcessRunner
   class Manager # :nodoc:
     include Util
 
-    PROCESSES_KEY = 'processes'
-
     def initialize(options)
       @options       = options
       @done          = false
@@ -35,7 +33,7 @@ module ProcessRunner
     end
 
     def workers_for_job(job_id)
-      stopping? ? 0 : ProcessRunner.worker_count(job_id)
+      stopping? ? 0 : ProcessRunner.scheduled_workers(job_id)
     end
 
     def run

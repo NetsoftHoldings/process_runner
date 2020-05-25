@@ -4,6 +4,7 @@ require 'process_runner'
 
 RSpec.describe ProcessRunner do
   worker_count_key = ProcessRunner::WORKER_COUNT_KEY
+  processes_key = ProcessRunner::PROCESSES_KEY
 
   it 'has a version number' do
     expect(ProcessRunner::VERSION).to_not be nil
@@ -204,10 +205,10 @@ RSpec.describe ProcessRunner do
     end
   end
 
-  describe '.adjust_worker_count' do
+  describe '.adjust_scheduled_workers' do
     include_context 'with redis'
 
-    subject { described_class.adjust_worker_count(job_id, **params) }
+    subject { described_class.adjust_scheduled_workers(job_id, **params) }
 
     let(:job_id) { :my_job }
     let(:params) { {} }
@@ -247,10 +248,10 @@ RSpec.describe ProcessRunner do
     end
   end
 
-  describe '.worker_count' do
+  describe '.scheduled_workers' do
     include_context 'with redis'
 
-    subject { described_class.worker_count(job_id) }
+    subject { described_class.scheduled_workers(job_id) }
 
     let(:job_id) { :my_job }
 
@@ -267,6 +268,84 @@ RSpec.describe ProcessRunner do
 
       it 'returns the override value' do
         is_expected.to eq(5)
+      end
+    end
+  end
+
+  describe '.running_workers' do
+    include_context 'with redis'
+
+    let(:identity_1) { 'deadbeef' }
+    let(:identity_2) { 'beefdead' }
+    let(:worker_key_1) { "#{identity_1}:workers" }
+    let(:worker_key_2) { "#{identity_2}:workers" }
+
+    let(:job_id) { :my_job }
+
+    subject { described_class.running_workers(job_id) }
+
+    before do
+      processes.each do |identifier|
+        redis.rpush(processes_key, identifier)
+      end
+    end
+
+    context 'when no processes are running' do
+      let(:processes) { [] }
+
+      it 'returns 0' do
+        is_expected.to eq(0)
+      end
+    end
+
+    context 'when one process is running' do
+      let(:processes) { [identity_1] }
+
+      before do
+        redis.mapped_hmset(worker_key_1, worker_1_data.transform_values(&:to_json))
+      end
+
+      context 'when the job is running in the process' do
+        let(:worker_1_data) { {job_id => {running: [{id: 0}, {id: 1}], stopping: [{id: 2}]}} }
+
+        it 'returns the count of running jobs' do
+          is_expected.to eq(2)
+        end
+      end
+
+      context 'when the job is not running in the process' do
+        let(:worker_1_data) { {'other_job' => {running: [{id: 0}, {id: 1}], stopping: [{id: 2}]}} }
+
+        it 'returns 0' do
+          is_expected.to eq(0)
+        end
+      end
+    end
+
+    context 'when two processes are running' do
+      let(:processes) { [identity_1, identity_2] }
+
+      before do
+        redis.mapped_hmset(worker_key_1, worker_1_data.transform_values(&:to_json))
+        redis.mapped_hmset(worker_key_2, worker_2_data.transform_values(&:to_json))
+      end
+
+      context 'when the job is defined' do
+        let(:worker_1_data) { {job_id => {running: [{id: 0}, {id: 2}], stopping: []}} }
+        let(:worker_2_data) { {job_id => {running: [{id: 1}], stopping: [{id: 3}]}} }
+
+        it 'returns the count of running jobs' do
+          is_expected.to eq(3)
+        end
+      end
+
+      context 'when the job is not running in the process' do
+        let(:worker_1_data) { {'other_job' => {running: [{id: 0}, {id: 2}], stopping: []}} }
+        let(:worker_2_data) { {'other_job' => {running: [{id: 1}], stopping: [{id: 3}]}} }
+
+        it 'returns 0' do
+          is_expected.to eq(0)
+        end
       end
     end
   end
