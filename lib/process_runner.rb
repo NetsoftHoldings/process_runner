@@ -123,7 +123,6 @@ module ProcessRunner # :nodoc:
 
       workers.each do |worker|
         data = c.hget("#{worker}:workers", job_id)
-        pp data: data
         if data
           data = JSON.parse(data, symbolize_names: true)
           count += (data.dig(:running)&.size || 0)
