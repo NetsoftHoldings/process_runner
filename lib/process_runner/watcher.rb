@@ -51,7 +51,7 @@ module ProcessRunner
       raise 'Not called within synchronize block' unless @lock.owned?
 
       logger.info "Starting worker #{job_id} @ #{worker_id}"
-      @running[worker_id] = Worker.new(@pool, worker_id, job_class, job_config)
+      @running[worker_id] = Worker.new(@pool, worker_id, job_config)
     end
 
     def stop_worker(worker_id, reason: '')
@@ -108,21 +108,6 @@ module ProcessRunner
 
     def job_id
       job_config[:id]
-    end
-
-    def job_class
-      @job_class ||= constantize(job_config[:class])
-    end
-
-    def constantize(str)
-      return Object.const_get(str) unless str.include?('::')
-
-      names = str.split('::')
-      names.shift if names.empty? || names.first.empty?
-
-      names.inject(Object) do |constant, name|
-        constant.const_get(name, false)
-      end
     end
   end
 end

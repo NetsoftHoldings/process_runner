@@ -23,7 +23,7 @@ RSpec.describe ProcessRunner::Watcher do
   let(:job_config) { {id: :test_job, class: 'MyClass'} }
   let(:instance) { described_class.new(pool, job_config) }
   let(:pool) { instance_double(Concurrent::ThreadPoolExecutor) }
-  let(:future) { instance_double(Concurrent::Promises::Future, resolved?: false) }
+  let(:future) { instance_double(Concurrent::Promises::Future, resolved?: false, rejected?: false) }
   let(:cancellation) { instance_double(ProcessRunner::Private::Cancellation) }
   let(:origin) { instance_double(Concurrent::Promises.resolvable_event.class, resolve: true, resolved?: false) }
 
@@ -202,25 +202,10 @@ RSpec.describe ProcessRunner::Watcher do
       expect { subject }.to change { running_workers }.to include(worker_id)
     end
 
-    context 'with a simple job class name' do
-      it 'passes that job class to the worker new' do
-        expect(ProcessRunner::Worker).to receive(:new).with(pool, worker_id, job_class, job_config)
+    it 'passes that job options to the worker new' do
+      expect(ProcessRunner::Worker).to receive(:new).with(pool, worker_id, job_config)
 
-        subject
-      end
-    end
-
-    context 'with a namespaced job class name' do
-      before do
-        stub_const('MyJobs::MyJob', job_class)
-        job_config[:class] = 'MyJobs::MyJob'
-      end
-
-      it 'passes that job class tot he worker new' do
-        expect(ProcessRunner::Worker).to receive(:new).with(pool, worker_id, job_class, job_config)
-
-        subject
-      end
+      subject
     end
   end
 

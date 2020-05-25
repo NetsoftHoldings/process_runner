@@ -3,24 +3,26 @@
 module ProcessRunner
   # Rails integration
   class Rails < ::Rails::Engine
-    initializer 'process_runner.active_record' do
-      ActiveSupport.on_load :active_record do
-        ProcessRunner.configure do |config|
-          config.options[:reloader] = ProcessRunner::Rails::ActiveRecordCleanup.new
+    config.after_initialize do
+      ProcessRunner.configure do |config|
+        if config.server?
+          config.options[:reloader] = ProcessRunner::Rails::Reloader.new
         end
       end
     end
 
     # cleanup active record connections
-    class ActiveRecordCleanup
+    class Reloader
       def initialize(app = ::Rails.application)
         @app = app
       end
 
       def call
-        yield
-      ensure
-        ActiveRecord::Base.clear_active_connections!
+        @app.reloader.wrap do
+          yield
+        end
+        # ensure
+        # ActiveRecord::Base.clear_active_connections!
       end
     end
   end

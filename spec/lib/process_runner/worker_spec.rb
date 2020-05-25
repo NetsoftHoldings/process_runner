@@ -6,17 +6,19 @@ require 'process_runner/base'
 RSpec.describe ProcessRunner::Worker do
   let(:worker_index) { 0 }
 
-  let(:instance) { described_class.new(pool, worker_index, job_class, job_options) }
+  let(:instance) { described_class.new(pool, worker_index, job_options) }
   let(:pool) { instance_double(Concurrent::ThreadPoolExecutor) }
   let(:future) { instance_double(Concurrent::Promises::Future) }
   let(:cancellation) { ProcessRunner::Private::Cancellation.new }
   let(:origin) { cancellation.origin }
 
-  let(:job) { instance.instance_variable_get(:@job) }
+  let(:job) { job_class.new(worker_index, job_options) }
   let(:job_options) { {id: :my_job, class: 'MyJob'} }
   let(:job_class) { Class.new(ProcessRunner::Base) }
 
   before do
+    stub_const('MyJob', job_class)
+    allow(job_class).to receive(:new).and_return(job)
     allow(Concurrent::Promises).to receive(:future_on).and_return(future)
     allow(ProcessRunner::Private::Cancellation).to receive(:new).and_return([cancellation, origin])
   end
@@ -85,8 +87,8 @@ RSpec.describe ProcessRunner::Worker do
       expect(instance.instance_variable_get(:@future)).to eq(future)
     end
 
-    it 'sets the job' do
-      expect(instance.instance_variable_get(:@job)).to be_a(job_class)
+    it 'sets the job_options' do
+      expect(instance.instance_variable_get(:@job_options)).to eq(job_options)
     end
 
     it 'sets the cancellation origin' do
@@ -226,6 +228,19 @@ RSpec.describe ProcessRunner::Worker do
 
       it 'only runs the job the first time' do
         expect(job).to receive(:perform).once
+
+        subject
+      end
+    end
+
+    context 'with a namespaced job class name' do
+      before do
+        stub_const('MyJobs::MyJob', job_class)
+        job_options[:class] = 'MyJobs::MyJob'
+      end
+
+      it 'still loads the job' do
+        expect(job).to receive(:perform).and_return(:abort)
 
         subject
       end
