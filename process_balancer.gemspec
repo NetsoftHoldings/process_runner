@@ -5,7 +5,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'process_runner/version'
 
 Gem::Specification.new do |spec|
-  spec.name    = 'process_runner'
+  spec.name    = 'process_balancer'
   spec.version = ProcessRunner::VERSION
   spec.authors = ['Edward Rudd']
   spec.email   = ['urkle@outoforder.cc']
