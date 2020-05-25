@@ -333,7 +333,7 @@ RSpec.describe ProcessRunner::Manager do
       it 'updates the stats for the running workers' do
         expect { subject }.to change { redis.type(workers_key) }.to('hash')
       end
-      
+
       it 'sets a key for each job in the workers hash' do
         expect { subject }.to change { redis.hgetall(workers_key) || {} }.to include('test_job' => '{}')
       end

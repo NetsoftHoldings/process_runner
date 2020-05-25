@@ -9,11 +9,11 @@ module ProcessRunner
         file = "process_runner/lock/#{driver}"
         driver = driver.to_s
         unless driver !~ /_/ && driver =~ /[A-Z]+.*/
-          driver = driver.split('_').map { |e| e.capitalize }.join
+          driver = driver.split('_').map(&:capitalize).join
         end
         require file
         klass = ProcessRunner::Lock.const_get(driver)
-        self.include klass
+        include klass
       else
         raise ArgumentError, 'Please pass a symbol for the driver to use'
       end
@@ -73,7 +73,7 @@ module ProcessRunner
       raise NotImplementedError
     end
 
-    def worker_lock(&block)
+    def worker_lock(&_block)
       raise NotImplementedError, 'Specify a locking driver via lock_driver :driver'
     end
   end

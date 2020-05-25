@@ -87,7 +87,7 @@ module ProcessRunner
 
     def update_stats
       stats = {
-          running: [],
+          running:  [],
           stopping: [],
       }
 

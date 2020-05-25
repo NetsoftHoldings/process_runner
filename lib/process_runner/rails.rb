@@ -1,14 +1,18 @@
 # frozen_string_literal: true
 
 module ProcessRunner
+  # Rails integration
   class Rails < ::Rails::Engine
-    config.after_initialize do
-      ProcessRunner.configure do |config|
-        config.options[:reloader] = ProcessRunner::Rails::Reloader.new
+    initializer 'process_runner.active_record' do
+      ActiveSupport.on_load :active_record do
+        ProcessRunner.configure do |config|
+          config.options[:reloader] = ProcessRunner::Rails::ActiveRecordCleanup.new
+        end
       end
     end
 
-    class Reloader
+    # cleanup active record connections
+    class ActiveRecordCleanup
       def initialize(app = ::Rails.application)
         @app = app
       end

@@ -42,6 +42,7 @@ module ProcessRunner
 
     def quiet
       return if @done
+
       @done = true
 
       update_jobs

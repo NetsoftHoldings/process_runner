@@ -275,14 +275,14 @@ RSpec.describe ProcessRunner do
   describe '.running_workers' do
     include_context 'with redis'
 
+    subject { described_class.running_workers(job_id) }
+
     let(:identity_1) { 'deadbeef' }
     let(:identity_2) { 'beefdead' }
     let(:worker_key_1) { "#{identity_1}:workers" }
     let(:worker_key_2) { "#{identity_2}:workers" }
 
     let(:job_id) { :my_job }
-
-    subject { described_class.running_workers(job_id) }
 
     before do
       processes.each do |identifier|

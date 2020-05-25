@@ -21,7 +21,7 @@ module ProcessRunner # :nodoc:
       require:          '.',
       max_threads:      10,
       shutdown_timeout: 30,
-      reloader:         proc { |&block| block.call }
+      reloader:         proc { |&block| block.call },
   }.freeze
 
   def self.options
@@ -116,7 +116,6 @@ module ProcessRunner # :nodoc:
   end
 
   def self.running_workers(job_id)
-
     count = 0
 
     redis do |c|
@@ -129,7 +128,7 @@ module ProcessRunner # :nodoc:
           data = JSON.parse(data, symbolize_names: true)
           count += (data.dig(:running)&.size || 0)
         end
-      rescue
+      rescue JSON::ParserError
         nil
       end
     end

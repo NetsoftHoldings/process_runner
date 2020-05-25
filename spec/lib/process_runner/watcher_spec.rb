@@ -152,11 +152,9 @@ RSpec.describe ProcessRunner::Watcher do
           subject
         end
 
-
         it 'updates the stats' do
           expect { subject }.to change { instance.stats }.to({running: [{id: 0}], stopping: [{id: 1}]})
         end
-
       end
 
       context 'when the job count is the same' do

@@ -15,6 +15,7 @@ module ProcessRunner
                          end
       end
 
+      # class to wrap the lock handling and provide the "extend!" method contract
       class LockHandler
         def initialize(key, value, ttl)
           @key      = key
@@ -30,9 +31,7 @@ module ProcessRunner
           wait_time  = 0.02..0.1
           start      = time_source.call
 
-          while !(@acquired = try_lock) && (time_source.call - start) < timeout_ms
-            sleep rand(wait_time)
-          end
+          sleep(rand(wait_time)) while !(@acquired = try_lock) && (time_source.call - start) < timeout_ms
         end
 
         def release!
