@@ -110,7 +110,12 @@ module ProcessRunner # :nodoc:
   end
 
   def self.worker_count(job_id)
-    redis { |c| c.hget(WORKER_COUNT_KEY, job_id.to_s) }&.to_i
+    value = redis { |c| c.hget(WORKER_COUNT_KEY, job_id.to_s) }&.to_i
+    value.nil? ? 1 : value
+  end
+
+  def self.running_count(_job_id)
+    nil
   end
 end
 

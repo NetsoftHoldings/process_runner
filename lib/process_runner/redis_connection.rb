@@ -18,7 +18,7 @@ module ProcessRunner
       private
 
       def determine_redis_provider
-        if ENV['REDIS_PROVIDER'] =~ /[^\w_\d]/
+        if ENV['REDIS_PROVIDER'] =~ /[^A-Za-z_]/
           ProcessRunner.logger.error 'REDIS_PROVIDER should be set to the name of the environment variable that contains the redis URL'
         end
         ENV[

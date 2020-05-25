@@ -7,13 +7,14 @@ module ProcessRunner
   class Watcher # :nodoc:
     include Util
 
-    attr_reader :job_config
+    attr_reader :job_config, :stats
 
     def initialize(pool, job_config)
       @pool       = pool
       @job_config = job_config
       @running    = {}
       @stopping   = []
+      @stats      = {}
       @lock       = Mutex.new
     end
 
@@ -35,6 +36,8 @@ module ProcessRunner
         stop_set.each do |worker_id|
           stop_worker(worker_id)
         end
+
+        update_stats
       end
     end
 
@@ -80,6 +83,27 @@ module ProcessRunner
           true
         end
       end
+    end
+
+    def update_stats
+      stats = {
+          running: [],
+          stopping: [],
+      }
+
+      @running.each_value do |v|
+        stats[:running] << {
+            id: v.worker_index,
+        }
+      end
+
+      @stopping.each do |v|
+        stats[:stopping] << {
+            id: v.worker_index,
+        }
+      end
+
+      @stats = stats
     end
 
     def job_id

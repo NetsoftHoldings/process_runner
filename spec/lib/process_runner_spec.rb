@@ -255,8 +255,8 @@ RSpec.describe ProcessRunner do
     let(:job_id) { :my_job }
 
     context 'when no override is set' do
-      it 'returns nil' do
-        is_expected.to be_nil
+      it 'returns 1' do
+        is_expected.to eq(1)
       end
     end
 

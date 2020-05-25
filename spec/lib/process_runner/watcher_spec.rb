@@ -77,6 +77,10 @@ RSpec.describe ProcessRunner::Watcher do
 
           subject
         end
+
+        it 'updates the stats' do
+          expect { subject }.to change { instance.stats }.to({running: [{id: 0}], stopping: []})
+        end
       end
 
       context 'and the process count is 2' do
@@ -88,6 +92,10 @@ RSpec.describe ProcessRunner::Watcher do
           expect(instance).to receive(:start_worker).with(2)
 
           subject
+        end
+
+        it 'updates the stats' do
+          expect { subject }.to change { instance.stats }.to({running: [{id: 0}, {id: 2}], stopping: []})
         end
 
         context 'when the process index is 1' do
@@ -113,6 +121,10 @@ RSpec.describe ProcessRunner::Watcher do
           subject
         end
 
+        it 'updates the stats' do
+          expect { subject }.to change { instance.stats }.to({running: [{id: 0}, {id: 3}], stopping: []})
+        end
+
         context 'when the process index is 1' do
           let(:process_index) { 1 }
 
@@ -121,6 +133,10 @@ RSpec.describe ProcessRunner::Watcher do
             expect(instance).to receive(:start_worker).with(4)
 
             subject
+          end
+
+          it 'updates the stats' do
+            expect { subject }.to change { instance.stats }.to({running: [{id: 1}, {id: 4}], stopping: []})
           end
         end
       end
@@ -135,6 +151,12 @@ RSpec.describe ProcessRunner::Watcher do
 
           subject
         end
+
+
+        it 'updates the stats' do
+          expect { subject }.to change { instance.stats }.to({running: [{id: 0}], stopping: [{id: 1}]})
+        end
+
       end
 
       context 'when the job count is the same' do
@@ -146,6 +168,10 @@ RSpec.describe ProcessRunner::Watcher do
           subject
         end
 
+        it 'updates the stats' do
+          expect { subject }.to change { instance.stats }.to({running: [{id: 0}, {id: 1}], stopping: []})
+        end
+
         context 'when the process count changes' do
           let(:process_count) { 2 }
 
@@ -153,6 +179,10 @@ RSpec.describe ProcessRunner::Watcher do
             expect(instance).to receive(:stop_worker).with(1)
 
             subject
+          end
+
+          it 'updates the stats' do
+            expect { subject }.to change { instance.stats }.to({running: [{id: 0}], stopping: [{id: 1}]})
           end
         end
       end

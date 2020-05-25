@@ -25,6 +25,7 @@ module ProcessRunner
     end
 
     def perform
+      before_perform
       worker_lock do |lock|
         @status = nil
         records = lock_records
@@ -36,6 +37,7 @@ module ProcessRunner
         @status
       ensure
         unlock_records
+        after_perform
       end
     end
 
@@ -54,6 +56,10 @@ module ProcessRunner
     def job_id
       options[:id]
     end
+
+    def before_perform; end
+
+    def after_perform; end
 
     def lock_records
       raise NotImplementedError

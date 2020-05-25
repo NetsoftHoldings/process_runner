@@ -35,9 +35,7 @@ module ProcessRunner
     end
 
     def workers_for_job(job_id)
-      value = stopping? ? 0 : ProcessRunner.worker_count(job_id)
-
-      value.nil? ? 1 : value
+      stopping? ? 0 : ProcessRunner.worker_count(job_id)
     end
 
     def run
@@ -145,8 +143,21 @@ module ProcessRunner
     end
 
     def update_jobs
+      watcher_stats = {}
       @watchers.each do |job_id, watcher|
         watcher.update_worker_config(process_index, process_count, workers_for_job(job_id))
+        watcher_stats[job_id] = JSON.dump(watcher.stats)
+      end
+
+      workers_key = "#{identity}:workers"
+      redis do |c|
+        c.multi do
+          c.del(workers_key)
+          watcher_stats.each do |job_id, stats_data|
+            c.hset(workers_key, job_id, stats_data)
+          end
+          c.expire(workers_key, 60)
+        end
       end
     end
 
@@ -159,8 +170,8 @@ module ProcessRunner
       end
     end
 
-    def to_data
-      {
+    def info
+      @info ||= {
           hostname: hostname,
           pid:      ::Process.pid,
           identity: identity,
@@ -168,7 +179,7 @@ module ProcessRunner
     end
 
     def info_json
-      @info_json ||= JSON.dump(to_data)
+      @info_json ||= JSON.dump(info)
     end
   end
 end

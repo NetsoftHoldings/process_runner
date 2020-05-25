@@ -14,7 +14,6 @@ RSpec.describe ProcessRunner::Manager do
   end
 
   processes_key = ProcessRunner::Manager::PROCESSES_KEY
-  worker_count_key = ProcessRunner::WORKER_COUNT_KEY
 
   describe '#initialize' do
     let(:job_sets) { [{id: :test_job, class: 'MyClass'}] }
@@ -42,6 +41,10 @@ RSpec.describe ProcessRunner::Manager do
   describe '#quiet' do
     subject { instance.quiet }
 
+    before do
+      allow(instance).to receive(:update_jobs)
+    end
+
     it 'changes the @done ivar to true' do
       expect { subject }.to change { instance.instance_variable_get(:@done) }.to(true)
     end
@@ -58,6 +61,7 @@ RSpec.describe ProcessRunner::Manager do
 
     before do
       allow(instance).to receive(:clear_heartbeat)
+      allow(instance).to receive(:update_jobs)
     end
 
     it 'calls quiet' do
@@ -94,6 +98,10 @@ RSpec.describe ProcessRunner::Manager do
   describe '#stopping?' do
     subject { instance.stopping? }
 
+    before do
+      allow(instance).to receive(:update_jobs)
+    end
+
     context 'when not quieted' do
       it 'returns false' do
         is_expected.to eq(false)
@@ -118,7 +126,7 @@ RSpec.describe ProcessRunner::Manager do
 
     let(:job_id) { :my_job }
 
-    context 'when the manager is queited' do
+    context 'when the manager is quieted' do
       before do
         instance.quiet
       end
@@ -128,20 +136,10 @@ RSpec.describe ProcessRunner::Manager do
       end
     end
 
-    context 'when there is no override in redis' do
-      it 'returns 1' do
-        is_expected.to eq(1)
-      end
-    end
+    it 'calls the ProcessRunner.worker_count' do
+      expect(ProcessRunner).to receive(:worker_count).with(job_id)
 
-    context 'when there is an override in redis' do
-      before do
-        redis.hset(worker_count_key, job_id.to_s, 5)
-      end
-
-      it 'returns the overridden value from redis' do
-        is_expected.to eq(5)
-      end
+      subject
     end
   end
 
@@ -317,15 +315,33 @@ RSpec.describe ProcessRunner::Manager do
       end
     end
 
-    describe 'update_jobs - managing the job watchers' do
+    describe 'update_jobs - managing the watchers' do
       let(:job_sets) { [{id: :test_job, class: 'MyClass'}] }
+      let(:watcher) { instance_double(ProcessRunner::Watcher, update_worker_config: nil, stats: {}) }
+      let(:workers_key) { "#{instance.identity}:workers" }
 
-      it 'updates each job watcher' do
-        watcher = instance_double(ProcessRunner::Watcher)
+      before do
         allow(ProcessRunner::Watcher).to receive(:new).and_return(watcher)
+      end
+
+      it 'updates each watcher' do
         expect(watcher).to receive(:update_worker_config)
 
         subject
+      end
+
+      it 'updates the stats for the running workers' do
+        expect { subject }.to change { redis.type(workers_key) }.to('hash')
+      end
+      
+      it 'sets a key for each job in the workers hash' do
+        expect { subject }.to change { redis.hgetall(workers_key) || {} }.to include('test_job' => '{}')
+      end
+
+      it 'sets the expire for the workers hash' do
+        subject
+
+        expect(redis.ttl(workers_key)).to eq(60)
       end
     end
 
