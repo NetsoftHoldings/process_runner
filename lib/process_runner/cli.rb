@@ -76,6 +76,7 @@ module ProcessRunner
         if ::Rails::VERSION::MAJOR < 5
           raise 'Only rails 5+ is supported'
         else
+          require 'process_runner/rails'
           require File.expand_path("#{options[:require]}/config/environment.rb")
         end
       else

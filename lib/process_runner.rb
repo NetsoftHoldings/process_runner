@@ -20,6 +20,7 @@ module ProcessRunner # :nodoc:
       require:          '.',
       max_threads:      10,
       shutdown_timeout: 30,
+      reloader:         proc { |&block| block.call }
   }.freeze
 
   def self.options
@@ -112,3 +113,5 @@ module ProcessRunner # :nodoc:
     redis { |c| c.hget(WORKER_COUNT_KEY, job_id.to_s) }&.to_i
   end
 end
+
+require 'process_runner/rails' if defined?(::Rails::Engine)

@@ -4,4 +4,4 @@
 - [x] implement watcher cleanup
 - [x] implement quiet properly (should stop watchers)
 - [ ] add in simple error handling
-- [ ] add in handling of ActiveRecord connections
+- [x] add in handling of ActiveRecord connections
