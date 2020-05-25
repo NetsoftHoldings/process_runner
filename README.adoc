@@ -71,6 +71,15 @@ class ProcessQueue < ProcessRunner::Base
 end
 ----
 
+Configuration file
+
+[source,yaml]
+----
+jobs:
+  process_queue:
+    class: 'ProcessQueue'
+----
+
 == Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/NetsoftHoldings/process_runner.
