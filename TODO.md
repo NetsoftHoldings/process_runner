@@ -3,5 +3,5 @@
 - [x] add config file loading 
 - [x] implement watcher cleanup
 - [x] implement quiet properly (should stop watchers)
-- [ ] add in simple error handling
 - [x] add in handling of ActiveRecord connections
+- [ ] add in simple error handling

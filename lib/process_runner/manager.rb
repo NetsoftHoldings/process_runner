@@ -18,7 +18,7 @@ module ProcessRunner
       @done          = false
       @process_index = Concurrent::AtomicFixnum.new(-1)
       @process_count = Concurrent::AtomicFixnum.new(0)
-      @pool          = Concurrent::ThreadPoolExecutor.new(max_threads: options[:max_threads], fallback_policy: :discard)
+      @pool          = Concurrent::ThreadPoolExecutor.new(max_threads: @options[:max_threads], fallback_policy: :discard)
 
       setup_job_watchers
     end
@@ -171,9 +171,10 @@ module ProcessRunner
 
     def info
       @info ||= {
-          hostname: hostname,
-          pid:      ::Process.pid,
-          identity: identity,
+          hostname:    hostname,
+          pid:         ::Process.pid,
+          identity:    identity,
+          max_threads: @options[:max_threads],
       }
     end
 

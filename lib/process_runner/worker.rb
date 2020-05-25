@@ -32,6 +32,10 @@ module ProcessRunner
       true
     end
 
+    def reason
+      @future.rejected? && @future.reason
+    end
+
     private
 
     def runner(cancellation)
@@ -43,6 +47,7 @@ module ProcessRunner
 
         case operation
         when :abort
+          ProcessRunner.logger.debug("Abort worker #{@job_options[:id]} @ #{@worker_index}")
           cancellation.origin.resolve
         when :sleep
           sleep args[0]

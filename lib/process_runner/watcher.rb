@@ -54,10 +54,10 @@ module ProcessRunner
       @running[worker_id] = Worker.new(@pool, worker_id, job_class, job_config)
     end
 
-    def stop_worker(worker_id)
+    def stop_worker(worker_id, reason: '')
       raise 'Not called within synchronize block' unless @lock.owned?
 
-      logger.info "Stopping worker #{job_id} @ #{worker_id}"
+      logger.info "Stopping worker #{job_id} @ #{worker_id} :: #{reason}"
 
       worker = @running.delete(worker_id)
       if worker
@@ -73,13 +73,13 @@ module ProcessRunner
         if v.running?
           # TODO: build up status info
         else
-          stop_worker(k)
+          stop_worker(k, reason: v.reason)
         end
       end
 
       @stopping.delete_if do |e|
         if e.stopped?
-          logger.debug("Reaping worker #{job_id} @ #{e.worker_index}")
+          logger.debug("Reaping worker #{job_id} @ #{e.worker_index} :: #{e.reason}")
           true
         end
       end
