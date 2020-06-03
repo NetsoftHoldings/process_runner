@@ -131,5 +131,4 @@ jobs:
             ./bin/tag_check.sh
             ./bin/setup-rubygems.sh
             rm -rf pkg
-            rake build
-            gem push pkg/*.gem
+            bundle exec rake release
