@@ -151,7 +151,7 @@ module ProcessBalancer
 
       opts = {}
       # pull in global config
-      opts.merge!(config.dig(:global) || {})
+      opts.merge!(config[:global] || {})
       # pull in ENV override config
       opts.merge!(config.dig(:environments, environment.to_sym) || {})
 
@@ -212,7 +212,7 @@ module ProcessBalancer
           # Heroku sends TERM and then waits 30 seconds for process to exit.
           raise Interrupt
         },
-        USR1: lambda { |cli|
+        USR1: lambda { |cli| # rubocop: disable Naming/VariableNumber
           ProcessBalancer.logger.info 'Received USR1, no longer accepting new work'
           cli.manager.quiet
         },

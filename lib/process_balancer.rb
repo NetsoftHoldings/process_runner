@@ -49,7 +49,7 @@ module ProcessBalancer # :nodoc:
   end
 
   def self.logger
-    @logger ||= Logger.new(STDOUT, level: Logger::INFO)
+    @logger ||= Logger.new($stdout, level: Logger::INFO)
   end
 
   def self.redis
@@ -124,7 +124,7 @@ module ProcessBalancer # :nodoc:
         data = c.hget("#{worker}:workers", job_id)
         if data
           data = JSON.parse(data, symbolize_names: true)
-          count += (data.dig(:running)&.size || 0)
+          count += (data[:running]&.size || 0)
         end
       rescue JSON::ParserError
         nil

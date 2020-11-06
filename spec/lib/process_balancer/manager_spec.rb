@@ -127,9 +127,9 @@ RSpec.describe ProcessBalancer::Manager do
   end
 
   describe '#workers_for_job' do
-    include_context 'with redis'
-
     subject { instance.workers_for_job(job_id) }
+
+    include_context 'with redis'
 
     let(:job_id) { :my_job }
 
@@ -151,9 +151,9 @@ RSpec.describe ProcessBalancer::Manager do
   end
 
   describe '#clear_heartbeat' do
-    include_context 'with redis'
-
     subject { instance.send(:clear_heartbeat) }
+
+    include_context 'with redis'
 
     before do
       add_workers(instance.identity)
@@ -199,9 +199,9 @@ RSpec.describe ProcessBalancer::Manager do
   end
 
   describe '#heartbeat' do
-    include_context 'with redis'
-
     subject { instance.send(:heartbeat) }
+
+    include_context 'with redis'
 
     before do
       # stub to prevent it from causing side-affects

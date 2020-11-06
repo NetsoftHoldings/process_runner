@@ -37,7 +37,7 @@ RSpec.describe ProcessBalancer::RedisConnection do
   end
 
   describe 'pool connection' do
-    subject { pool.with {} }
+    subject { pool.with {} } # stubbing block
 
     let(:pool) { described_class.create(options) }
     let(:env) { {REDIS_URL: nil, REDIS_PROVIDER: nil} }
