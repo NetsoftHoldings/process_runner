@@ -31,7 +31,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'climate_control', '~> 0.2'
   spec.add_development_dependency 'fakefs', '~> 1.2.2'
   spec.add_development_dependency 'mock_redis', '~> 0.24'
-  spec.add_development_dependency 'rake', '~> 11.0'
+  spec.add_development_dependency 'rake', '>= 12.3.3'
   spec.add_development_dependency 'redis-namespace', '~> 1.7'
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'rspec_junit_formatter', '~> 0.4'
