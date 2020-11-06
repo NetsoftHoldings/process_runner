@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'bundler', '~> 1.17'
   spec.add_development_dependency 'climate_control', '~> 0.2'
   spec.add_development_dependency 'fakefs', '~> 1.2.2'
-  spec.add_development_dependency 'mock_redis', '~> 0.23'
+  spec.add_development_dependency 'mock_redis', '~> 0.24'
   spec.add_development_dependency 'rake', '~> 11.0'
   spec.add_development_dependency 'redis-namespace', '~> 1.7'
   spec.add_development_dependency 'rspec', '~> 3.0'
