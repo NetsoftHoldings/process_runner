@@ -43,7 +43,7 @@ RSpec.describe ProcessBalancer::Util do
 
   describe '#redis' do
     it 'forwards to ProcessBalancer.redis' do
-      block = proc {}
+      block = proc {} # stubbing block
       expect(ProcessBalancer).to receive(:redis) { |&b| expect(b).to eq(block) }
 
       instance.redis(&block)
@@ -53,7 +53,7 @@ RSpec.describe ProcessBalancer::Util do
   describe '#start_thread' do
     subject { instance.start_thread('my_name', &block) }
 
-    let(:block) { proc {} }
+    let(:block) { proc {} } # stubbing block
 
     it 'spins up a thread' do
       expect(Thread).to receive(:new)
@@ -85,7 +85,7 @@ RSpec.describe ProcessBalancer::Util do
   describe '#watchdog' do
     subject { instance.watchdog(&block) }
 
-    let(:block) { proc {} }
+    let(:block) { proc {} } # stubbing block
 
     it 'yields control' do
       expect { |y| instance.watchdog(&y) }.to yield_control

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 ### Changed
 - handle pruning stale workers from the process list
+- updated rubocop
 ### Fixed
 
 ## [1.0.0]

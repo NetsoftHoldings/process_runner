@@ -38,13 +38,26 @@ Layout/SpaceInsideHashLiteralBraces:
 Lint/AmbiguousBlockAssociation:
   Exclude:
     - spec/**/*
+Lint/DuplicateRegexpCharacterClassElement:
+  Enabled: true
+Lint/EmptyBlock:
+  Enabled: true
+Lint/NoReturnInBeginEndBlocks:
+  Enabled: true
 Lint/RaiseException:
   Enabled: true
 Lint/StructNewOverride:
   Enabled: true
+Lint/ToEnumArguments:
+  Enabled: true
+Lint/UnmodifiedReduceAccumulator:
+  Enabled: true
 
 Metrics:
   Enabled: false
+
+Naming/VariableNumber:
+  EnforcedStyle: snake_case
 
 RSpec/ContextWording:
   Prefixes:
@@ -56,6 +69,8 @@ RSpec/ExpectChange:
   EnforcedStyle: block
 RSpec/ImplicitSubject:
   Enabled: false
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
 RSpec/MessageSpies:
   EnforcedStyle: receive
 RSpec/MultipleExpectations:
@@ -66,7 +81,15 @@ RSpec/NestedGroups:
   Enabled: false
 RSpec/NotToNot:
   EnforcedStyle: to_not
+RSpec/StubbedMock:
+  Enabled: false
 
+Style/ArgumentsForwarding:
+  Enabled: true
+Style/CollectionCompact:
+  Enabled: true
+Style/DocumentDynamicEvalDefinition:
+  Enabled: true
 Style/ExponentialNotation:
   Enabled: true
 Style/HashEachMethods:
@@ -75,9 +98,13 @@ Style/IfUnlessModifier:
   Enabled: false
 Style/GuardClause:
   Enabled: false
+Style/NegatedIfElseCondition:
+  Enabled: true
 Style/Semicolon:
   AllowAsExpressionSeparator: true
 Style/SlicingWithRange:
+  Enabled: true
+Style/SwapValues:
   Enabled: true
 Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: comma

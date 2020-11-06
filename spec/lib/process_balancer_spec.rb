@@ -51,7 +51,7 @@ RSpec.describe ProcessBalancer do
       it 'calls redis_pool' do
         expect(described_class).to receive(:redis_pool).and_return(instance_double('ConnectionPool', with: true))
 
-        described_class.redis {}
+        described_class.redis {} # stubbing block
       end
 
       it 'yields control with the redis connection' do
@@ -71,9 +71,9 @@ RSpec.describe ProcessBalancer do
           end
         end
 
-        let(:pass_1) { -> {} }
-        let(:pass_2) { -> {} }
-        let(:pass_3) { -> {} }
+        let(:pass_1) { -> {} } # stubbing block
+        let(:pass_2) { -> {} } # stubbing block
+        let(:pass_3) { -> {} } # stubbing block
         let(:passes) { [pass_1, pass_2, pass_3] }
 
         before do
@@ -206,9 +206,9 @@ RSpec.describe ProcessBalancer do
   end
 
   describe '.adjust_scheduled_workers' do
-    include_context 'with redis'
-
     subject { described_class.adjust_scheduled_workers(job_id, **params) }
+
+    include_context 'with redis'
 
     let(:job_id) { :my_job }
     let(:params) { {} }
@@ -249,9 +249,9 @@ RSpec.describe ProcessBalancer do
   end
 
   describe '.scheduled_workers' do
-    include_context 'with redis'
-
     subject { described_class.scheduled_workers(job_id) }
+
+    include_context 'with redis'
 
     let(:job_id) { :my_job }
 
@@ -273,9 +273,9 @@ RSpec.describe ProcessBalancer do
   end
 
   describe '.running_workers' do
-    include_context 'with redis'
-
     subject { described_class.running_workers(job_id) }
+
+    include_context 'with redis'
 
     let(:identity_1) { 'deadbeef' }
     let(:identity_2) { 'beefdead' }

@@ -17,10 +17,8 @@ module ProcessBalancer
         @app = app
       end
 
-      def call
-        @app.reloader.wrap do
-          yield
-        end
+      def call(&block)
+        @app.reloader.wrap(&block)
         # ensure
         # ActiveRecord::Base.clear_active_connections!
       end

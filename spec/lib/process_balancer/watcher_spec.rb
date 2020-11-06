@@ -210,9 +210,9 @@ RSpec.describe ProcessBalancer::Watcher do
   end
 
   describe '#stop_worker' do
-    include_context 'with spin up workers', ids: [0]
-
     subject { instance.send(:with_lock) { instance.send(:stop_worker, worker_id) } }
+
+    include_context 'with spin up workers', ids: [0]
 
     context 'when not run within the lock' do
       it 'raises a runtime error' do
@@ -260,9 +260,9 @@ RSpec.describe ProcessBalancer::Watcher do
   end
 
   describe '#check_workers' do
-    include_context 'with spin up workers', ids: [0]
-
     subject { instance.send(:with_lock) { instance.send(:check_workers) } }
+
+    include_context 'with spin up workers', ids: [0]
 
     let(:worker) { running_workers[0] }
 

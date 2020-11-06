@@ -194,7 +194,7 @@ RSpec.describe ProcessBalancer::Base do
     end
 
     it 'raises not implemented for worker_lock' do
-      expect { instance.send(:worker_lock) {} }.to raise_error(NotImplementedError)
+      expect { instance.send(:worker_lock) {} }.to raise_error(NotImplementedError) # stubbing block
     end
 
     it 'raises not implemented for lock_records' do
