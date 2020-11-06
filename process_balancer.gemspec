@@ -35,8 +35,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'redis-namespace', '~> 1.7'
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'rspec_junit_formatter', '~> 0.4'
-  spec.add_development_dependency 'rubocop', '~> 0.83.0'
-  spec.add_development_dependency 'rubocop-rspec', '~> 1.39.0'
+  spec.add_development_dependency 'rubocop', '~> 1.2.0'
+  spec.add_development_dependency 'rubocop-rspec', '~> 2.0.0'
   spec.add_development_dependency 'simplecov', '~> 0.12'
 
   spec.add_dependency 'concurrent-ruby', '~> 1.1'
