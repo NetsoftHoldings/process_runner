@@ -15,6 +15,13 @@ RSpec.describe ProcessBalancer::Manager do
 
   processes_key = ProcessBalancer::PROCESSES_KEY
 
+  def add_workers(*identifiers, stale: false)
+    identifiers.each do |id|
+      redis.rpush(ProcessBalancer::PROCESSES_KEY, id)
+      redis.hmset(id, 'beat', Time.now.to_f) unless stale
+    end
+  end
+
   describe '#initialize' do
     let(:job_sets) { [{id: :test_job, class: 'MyClass'}] }
     let(:watchers) { instance.instance_variable_get(:@watchers) }
@@ -149,11 +156,15 @@ RSpec.describe ProcessBalancer::Manager do
     subject { instance.send(:clear_heartbeat) }
 
     before do
-      redis.rpush(processes_key, instance.identity)
+      add_workers(instance.identity)
     end
 
     it 'removes the identity from the processes key' do
       expect { subject }.to change { redis.lrange(processes_key, 0, -1) }.to not_include(instance.identity)
+    end
+
+    it 'does not remove the worker state' do
+      expect { subject }.to_not change { redis.exists?(instance.identity) }.from(true)
     end
   end
 
@@ -216,8 +227,7 @@ RSpec.describe ProcessBalancer::Manager do
 
       context 'when there are other workers' do
         before do
-          redis.rpush(processes_key, 'worker 1')
-          redis.rpush(processes_key, 'worker 2')
+          add_workers('worker 1', 'worker 2')
         end
 
         it 'changes the process index to 2' do
@@ -244,8 +254,7 @@ RSpec.describe ProcessBalancer::Manager do
 
           context 'and the instance identity is in the worker list' do
             before do
-              redis.rpush(processes_key, instance.identity)
-              redis.rpush(processes_key, 'worker 3')
+              add_workers(instance.identity, 'worker 3')
               instance.send(:process_count=, 4)
             end
 
@@ -293,11 +302,86 @@ RSpec.describe ProcessBalancer::Manager do
           end
         end
       end
+
+      context 'when there is a stale worker' do
+        before do
+          add_workers('worker 1')
+          add_workers('worker 2', stale: true)
+        end
+
+        it 'changes the process index to 1' do
+          expect { subject }.to change { instance.process_index }.to(1)
+        end
+
+        it 'changes the process count to 2' do
+          expect { subject }.to change { instance.process_count }.to(2)
+        end
+
+        it 'removes the stale worker' do
+          expect { subject }.to change { redis.lrange(processes_key, 0, -1) }.to not_include('worker 2')
+        end
+
+        it 'calls watch twice' do
+          expect(redis).to receive(:watch).with(processes_key).twice
+
+          subject
+        end
+
+        context 'when the instance already has a process index' do
+          before do
+            instance.send(:process_index=, 2)
+            instance.send(:process_count=, 3)
+          end
+
+          context 'and the instance identity is not in the worker list' do
+            it 'adds it to the list' do
+              expect(redis).to receive(:rpush).with(processes_key, instance.identity).and_call_original
+
+              subject
+            end
+          end
+
+          context 'and the instance identity is in the worker list' do
+            before do
+              add_workers(instance.identity, 'worker 3')
+              instance.send(:process_count=, 4)
+            end
+
+            it 'changes the same process index' do
+              expect { subject }.to change { instance.process_index }.from(2).to(1)
+            end
+
+            it 'changes the process count' do
+              expect { subject }.to change { instance.process_count }.from(4).to(3)
+            end
+
+            it 'calls unwatch' do
+              expect(redis).to receive(:unwatch)
+
+              subject
+            end
+
+            context 'and a prior worker is removed' do
+              before do
+                redis.lrem(processes_key, 0, 'worker 2')
+              end
+
+              it 'updates the process index to 1' do
+                expect { subject }.to change { instance.process_index }.to(1)
+              end
+
+              it 'changes the process count to 3' do
+                expect { subject }.to change { instance.process_count }.to(3)
+              end
+            end
+          end
+        end
+      end
     end
 
     describe 'update_state - updating the state in redis' do
       it 'creates/updates a hash key for its identity' do
-        expect { subject }.to change { redis.exists(instance.identity) }.to(true)
+        expect { subject }.to change { redis.exists?(instance.identity) }.to(true)
 
         expect(redis.type(instance.identity)).to eq('hash')
       end

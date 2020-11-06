@@ -121,7 +121,18 @@ module ProcessBalancer
       redis do |c|
         c.watch(PROCESSES_KEY)
 
-        workers     = c.lrange(PROCESSES_KEY, 0, -1)
+        workers   = c.lrange(PROCESSES_KEY, 0, -1)
+        stale_ids = workers.reject { |i| c.exists(i).positive? }
+        unless stale_ids.empty?
+          c.multi do
+            stale_ids.each do |id|
+              c.lrem(PROCESSES_KEY, 0, id)
+            end
+          end
+          # re-fetch
+          c.watch(PROCESSES_KEY)
+          workers = c.lrange(PROCESSES_KEY, 0, -1)
+        end
         num_workers = workers.size
         index       = workers.find_index(identity)
 
