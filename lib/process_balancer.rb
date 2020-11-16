@@ -15,8 +15,8 @@ module ProcessBalancer # :nodoc:
   WORKER_COUNT_KEY = 'worker_counts'
 
   DEFAULTS = {
-      redis:            {},
-      job_sets:         [],
+      redis:            {}.freeze,
+      job_sets:         [].freeze,
       require:          '.',
       max_threads:      10,
       shutdown_timeout: 30,
@@ -24,7 +24,12 @@ module ProcessBalancer # :nodoc:
   }.freeze
 
   def self.options
-    @options ||= DEFAULTS.dup
+    @options ||= begin
+      o = DEFAULTS.dup
+      o[:redis] = o[:redis].dup
+      o[:job_sets] = o[:job_sets].dup
+      o
+    end
   end
 
   def self.options=(opts)
