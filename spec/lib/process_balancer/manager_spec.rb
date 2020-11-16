@@ -327,6 +327,23 @@ RSpec.describe ProcessBalancer::Manager do
           subject
         end
 
+        context 'when the exists method returns a bool' do
+          before do
+            allow(redis).to receive(:exists).and_wrap_original do |m, *args|
+              value = m.call(*args)
+              value > 0
+            end
+          end
+
+          it 'changes the process count to 2' do
+            expect { subject }.to change { instance.process_count }.to(2)
+          end
+
+          it 'does not raise an exception' do
+            expect { subject }.to_not raise_error
+          end
+        end
+
         context 'when the instance already has a process index' do
           before do
             instance.send(:process_index=, 2)

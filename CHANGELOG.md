@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 ### Fixed
 
+## [1.1.1]
+### Fixed
+- handle better redis gem before 4.2 and post 4.2
+
 ## [1.1.0]
 ### Changed
 - handle pruning stale workers from the process list

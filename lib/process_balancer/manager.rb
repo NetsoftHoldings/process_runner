@@ -122,7 +122,7 @@ module ProcessBalancer
         c.watch(PROCESSES_KEY)
 
         workers   = c.lrange(PROCESSES_KEY, 0, -1)
-        stale_ids = workers.reject { |i| c.exists(i).positive? }
+        stale_ids = workers.reject { |i| [true, 1].include?(c.exists(i)) }
         unless stale_ids.empty?
           c.multi do
             stale_ids.each do |id|
