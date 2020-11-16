@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Next]
 ### Added
 ### Changed
-- handle pruning stale workers from the process list
 ### Fixed
+
+## [1.1.0]
+### Changed
+- handle pruning stale workers from the process list
 
 ## [1.0.0]
 ### Added
